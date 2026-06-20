@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexusAI — Personal AI Assistant</title>
+<meta name="description" content="NexusAI — a private, browser-based AI assistant powered by Claude. Built by Hamza Jamil.">
+
+<!-- ============================================================
+     NEXUSAI — Single-file AI Chat Application (HTML + CSS + JS)
+     Built by: Hamza Jamil — Web Developer & AI Agent Specialist
+     LinkedIn: linkedin.com/in/muhammadhumxa
+     Open this file in any browser to run. No build step required.
+     ============================================================ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  /* ===== RESET & BASE ===== */
+  *, *::before, *::after {
+    margin: 0; padding: 0; box-sizing: border-box;
+  }
+
+  :root {
+    --bg:          #09090f;
+    --surface:     #111118;
+    --surface2:    #1a1a27;
+    --surface3:    #22223a;
+    --border:      rgba(139, 92, 246, 0.18);
+    --border-hover:rgba(139, 92, 246, 0.45);
+    --purple:      #8b5cf6;
+    --purple-light:#a78bfa;
+    --purple-dim:  rgba(139,92,246,0.12);
+    --gold:        #f0b94d;
+    --gold-dim:    rgba(240,185,77,0.12);
+    --text:        #ede9ff;
+    --muted:       #7c748f;
+    --muted2:      #4f4a62;
+    --user-bg:     #1e1845;
+    --user-border: rgba(139,92,246,0.35);
+    --ai-bg:       #111118;
+    --danger:      #f87171;
+    --success:     #34d399;
+    --radius-sm:   8px;
+    --radius-md:   14px;
+    --radius-lg:   20px;
+    --font:        'Inter', -apple-system, 'Segoe UI', system-ui, sans-serif;
+    --font-display:'Space Grotesk', var(--font);
+    --font-mono:   'SF Mono', 'Consolas', monospace;
+  }
+
+  html, body {
+    height: 100%;
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+  }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 10px; }
+
+  /* ===== LAYOUT ===== */
+  #app {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ===== SIDEBAR ===== */
+  #sidebar {
+    width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar-header {
+    padding: 20px 18px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .logo-mark {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--purple) 0%, #c084fc 100%);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    box-shadow: 0 0 20px rgba(139,92,246,0.3);
+  }
+
+  .logo-text {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    font-family: var(--font-display);
+  }
+
+  .logo-text span { color: var(--purple-light); }
+
+  .new-chat-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--purple-dim);
+    border: 1px solid var(--border-hover);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+    color: var(--purple-light);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--font);
+  }
+
+  .new-chat-btn:hover {
+    background: rgba(139,92,246,0.22);
+    border-color: var(--purple);
+  }
+
+  .sidebar-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--muted2);
+    padding: 14px 18px 6px;
+    font-weight: 600;
+  }
+
+  .history-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 8px;
+  }
+
+  .history-item {
+    padding: 9px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .history-item:hover { background: var(--surface2); color: var(--text); }
+  .history-item.active { background: var(--purple-dim); color: var(--purple-light); }
+  .history-item svg { flex-shrink: 0; opacity: 0.5; }
+
+  .sidebar-footer {
+    padding: 14px 18px 18px;
+    border-top: 1px solid var(--border);
+  }
+
+  .creator-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .creator-card:hover { border-color: var(--gold); background: var(--gold-dim); }
+
+  .creator-avatar {
+    width: 32px; height: 32px;
+    flex-shrink: 0;
+    border-radius: 9px;
+    background: linear-gradient(135deg, var(--gold) 0%, #e0973a 100%);
+    color: #1a1306;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .creator-info { min-width: 0; }
+  .creator-name { font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; }
+  .creator-role { font-size: 10.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .api-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--muted);
+    padding: 8px 10px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+  }
+
+  .status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--muted2);
+  }
+  .status-dot.green { background: var(--success); box-shadow: 0 0 8px rgba(52,211,153,0.5); animation: glow 2s infinite; }
+
+  @keyframes glow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  /* ===== MAIN AREA ===== */
+  #main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ===== TOP BAR ===== */
+  #topbar {
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  #menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 4px;
+  }
+
+  .model-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .model-badge .dot { width: 6px; height: 6px; background: var(--purple); border-radius: 50%; }
+
+  .topbar-actions { display: flex; gap: 8px; }
+
+  .icon-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 7px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font);
+    font-size: 12px;
+    gap: 5px;
+  }
+
+  .icon-btn:hover { border-color: var(--border-hover); color: var(--text); background: var(--surface2); }
+
+  /* ===== SETUP SCREEN ===== */
+  #setup-screen {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 24px;
+    background: var(--bg);
+    overflow-y: auto;
+    height: 100%;
+  }
+
+  .setup-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 40px 36px;
+    max-width: 440px;
+    width: 100%;
+    margin: auto;
+  }
+
+  .setup-top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .setup-icon-box {
+    width: 52px; height: 52px;
+    background: linear-gradient(135deg, var(--purple), #c084fc);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+    box-shadow: 0 0 24px rgba(139,92,246,0.35);
+  }
+
+  .setup-title h2 { font-size: 20px; font-weight: 700; margin-bottom: 3px; font-family: var(--font-display); }
+  .setup-title p { font-size: 13px; color: var(--muted); }
+
+  .setup-credit {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 11.5px;
+    color: var(--muted2);
+    text-align: center;
+  }
+  .setup-credit a { color: var(--gold); text-decoration: none; font-weight: 600; }
+  .setup-credit a:hover { text-decoration: underline; }
+
+  .steps-list {
+    list-style: none;
+    margin-bottom: 24px;
+  }
+
+  .steps-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .steps-list li:last-child { border: none; }
+
+  .step-num {
+    width: 22px; height: 22px;
+    background: var(--purple-dim);
+    border: 1px solid var(--border-hover);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--purple-light);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .step-link { color: var(--purple-light); text-decoration: none; font-weight: 600; }
+  .step-link:hover { text-decoration: underline; }
+
+  .input-group { margin-bottom: 12px; }
+  .input-group label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .field {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+    font-family: var(--font);
+    transition: border-color 0.2s;
+  }
+
+  .field:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(139,92,246,0.1); }
+  .field::placeholder { color: var(--muted2); }
+
+  .btn-primary {
+    width: 100%;
+    background: var(--purple);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font);
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+
+  .btn-primary:hover { background: var(--purple-light); transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+
+  .error-box {
+    background: rgba(248,113,113,0.1);
+    border: 1px solid rgba(248,113,113,0.3);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--danger);
+    margin-bottom: 12px;
+    display: none;
+  }
+
+  /* ===== CHAT SCREEN ===== */
+  #chat-screen {
+    flex: 1;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  #messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* ===== WELCOME STATE ===== */
+  .welcome-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .welcome-orb {
+    width: 72px; height: 72px;
+    background: linear-gradient(135deg, var(--purple) 0%, #c084fc 100%);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 40px rgba(139,92,246,0.35);
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .welcome-state h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-family: var(--font-display);
+    background: linear-gradient(135deg, var(--text) 0%, var(--purple-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .welcome-state p { color: var(--muted); font-size: 15px; margin-bottom: 28px; }
+
+  .suggestion-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    max-width: 500px;
+    width: 100%;
+  }
+
+  .suggestion-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--font);
+    color: var(--text);
+  }
+
+  .suggestion-card:hover {
+    border-color: var(--border-hover);
+    background: var(--surface2);
+    transform: translateY(-2px);
+  }
+
+  .suggestion-card .s-icon { font-size: 20px; margin-bottom: 6px; }
+  .suggestion-card .s-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .suggestion-card .s-sub { font-size: 11px; color: var(--muted); }
+
+  /* ===== MESSAGE BUBBLES ===== */
+  .msg-wrapper {
+    display: flex;
+    gap: 12px;
+    animation: slideUp 0.25s ease;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg-wrapper.user { flex-direction: row-reverse; }
+
+  .avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .avatar.ai {
+    background: linear-gradient(135deg, var(--purple), #c084fc);
+    box-shadow: 0 0 12px rgba(139,92,246,0.3);
+  }
+
+  .avatar.user {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    font-size: 16px;
+  }
+
+  .msg-body { display: flex; flex-direction: column; max-width: 70%; }
+  .msg-wrapper.user .msg-body { align-items: flex-end; }
+
+  .msg-name {
+    font-size: 11px;
+    color: var(--muted2);
+    margin-bottom: 4px;
+    padding: 0 4px;
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  .msg-time { color: var(--muted2); }
+
+  .bubble {
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    line-height: 1.7;
+    word-break: break-word;
+  }
+
+  .bubble.ai {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top-left-radius: 4px;
+    color: var(--text);
+  }
+
+  .bubble.user {
+    background: var(--user-bg);
+    border: 1px solid var(--user-border);
+    border-top-right-radius: 4px;
+    color: #d4cfff;
+  }
+
+  .bubble p { margin: 0; }
+  .bubble p + p { margin-top: 10px; }
+  .bubble strong { color: var(--purple-light); font-weight: 600; }
+
+  .bubble code {
+    background: var(--surface3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: #c4b5fd;
+  }
+
+  .bubble pre {
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    margin: 10px 0;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: #c4b5fd;
+    line-height: 1.6;
+  }
+
+  .bubble pre code { background: none; padding: 0; }
+
+  /* Typing indicator */
+  .typing-dots {
+    display: flex; gap: 5px; padding: 4px 2px; align-items: center;
+  }
+
+  .typing-dots span {
+    width: 7px; height: 7px;
+    background: var(--purple);
+    border-radius: 50%;
+    animation: typingBounce 1.3s ease-in-out infinite;
+  }
+
+  .typing-dots span:nth-child(2) { animation-delay: 0.18s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.36s; }
+
+  @keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+    30% { transform: translateY(-7px); opacity: 1; }
+  }
+
+  /* ===== INPUT AREA ===== */
+  #input-area {
+    padding: 14px 24px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+
+  .quick-chips {
+    display: flex; gap: 8px; margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .chip {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.18s;
+    font-family: var(--font);
+  }
+
+  .chip:hover { border-color: var(--border-hover); color: var(--text); background: var(--purple-dim); }
+
+  .input-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    transition: border-color 0.2s;
+  }
+
+  .input-row:focus-within {
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(139,92,246,0.1);
+  }
+
+  #user-input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-size: 14px;
+    resize: none;
+    max-height: 140px;
+    line-height: 1.6;
+    font-family: var(--font);
+  }
+
+  #user-input::placeholder { color: var(--muted2); }
+
+  #send-btn {
+    width: 38px; height: 38px;
+    background: var(--purple);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.18s;
+  }
+
+  #send-btn:hover { background: var(--purple-light); transform: scale(1.05); }
+  #send-btn:active { transform: scale(0.95); }
+  #send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .input-hint {
+    font-size: 11px;
+    color: var(--muted2);
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  /* ===== MOBILE ===== */
+  @media (max-width: 680px) {
+    #sidebar {
+      position: fixed;
+      left: 0; top: 0; bottom: 0;
+      z-index: 100;
+      transform: translateX(-100%);
+    }
+
+    #sidebar.open { transform: translateX(0); }
+
+    #menu-btn { display: flex; }
+
+    .suggestion-grid { grid-template-columns: 1fr; }
+    .msg-body { max-width: 85%; }
+    #messages { padding: 20px 14px; }
+    #input-area { padding: 12px 14px 16px; }
+    #topbar { padding: 12px 14px; }
+    #setup-screen { padding: 24px 16px; }
+    .setup-card { padding: 28px 22px; }
+  }
+
+  /* ===== OVERLAY for mobile sidebar ===== */
+  #overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 99;
+    backdrop-filter: blur(2px);
+  }
+
+  #overlay.show { display: block; }
+
+  /* ===== TOAST ===== */
+  #toast {
+    position: fixed;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 9px 18px;
+    font-size: 13px;
+    color: var(--text);
+    z-index: 999;
+    transition: transform 0.3s ease;
+    white-space: nowrap;
+  }
+
+  #toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- ======================================================
+     TOAST NOTIFICATION
+     ====================================================== -->
+<div id="toast">✓ Copied!</div>
+
+<!-- ======================================================
+     MOBILE OVERLAY
+     ====================================================== -->
+<div id="overlay" onclick="closeSidebar()"></div>
+
+<!-- ======================================================
+     MAIN APP
+     ====================================================== -->
+<div id="app">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-mark">✦</div>
+        <div class="logo-text">Nexus<span>AI</span></div>
+      </div>
+      <button class="new-chat-btn" onclick="newChat()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Chat
+      </button>
+    </div>
+
+    <div class="sidebar-label">Recent Chats</div>
+    <div class="history-list" id="history-list">
+      <!-- populated by JS -->
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="api-status" id="api-status">
+        <div class="status-dot" id="status-dot"></div>
+        <span id="status-text">No API key set</span>
+      </div>
+      <a class="creator-card" href="https://www.linkedin.com/in/muhammadhumxa/" target="_blank" rel="noopener" title="View Hamza Jamil's LinkedIn profile">
+        <div class="creator-avatar">HJ</div>
+        <div class="creator-info">
+          <div class="creator-name">Built by Hamza Jamil</div>
+          <div class="creator-role">Web Developer & AI Agent Specialist</div>
+        </div>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN PANEL ===== -->
+  <div id="main">
+
+    <!-- TOP BAR -->
+    <div id="topbar">
+      <div class="topbar-left">
+        <button id="menu-btn" onclick="toggleSidebar()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="model-badge">
+          <div class="dot"></div>
+          Claude Sonnet 4.6
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" onclick="copyChat()" title="Copy conversation">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy
+        </button>
+        <button class="icon-btn" onclick="clearApiKey()" title="Change API key">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+          API Key
+        </button>
+      </div>
+    </div>
+
+    <!-- SETUP SCREEN -->
+    <div id="setup-screen">
+      <div class="setup-card">
+        <div class="setup-top">
+          <div class="setup-icon-box">🔑</div>
+          <div class="setup-title">
+            <h2>Get Started</h2>
+            <p>Just one API key — nothing else to install</p>
+          </div>
+        </div>
+
+        <ul class="steps-list">
+          <li>
+            <div class="step-num">1</div>
+            <div><strong>Go to:</strong> <a href="https://console.anthropic.com" target="_blank" class="step-link">console.anthropic.com</a> and create an account (Google sign-in works too)</div>
+          </li>
+          <li>
+            <div class="step-num">2</div>
+            <div>Open the <strong>"API Keys"</strong> section and click <strong>"Create Key"</strong></div>
+          </li>
+          <li>
+            <div class="step-num">3</div>
+            <div>Copy the key — it starts with <code style="background:var(--surface3);padding:2px 6px;border-radius:4px;font-size:12px;color:#c4b5fd;">sk-ant-api03-...</code></div>
+          </li>
+          <li>
+            <div class="step-num">4</div>
+            <div>Paste it below and start chatting! New accounts come with <strong>free credits</strong> 🎉</div>
+          </li>
+        </ul>
+
+        <div class="input-group">
+          <label>Claude API Key</label>
+          <input type="password" class="field" id="api-key-input" placeholder="sk-ant-api03-XXXXXXXXXXXX" />
+        </div>
+
+        <div class="input-group">
+          <label>Your Name (Optional)</label>
+          <input type="text" class="field" id="user-name-input" placeholder="e.g. Ali" />
+        </div>
+
+        <div class="error-box" id="error-box">⚠️ Something went wrong</div>
+
+        <button class="btn-primary" onclick="startChat()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Start Chatting
+        </button>
+
+        <div class="setup-credit">Designed &amp; built by <a href="https://www.linkedin.com/in/muhammadhumxa/" target="_blank" rel="noopener">Hamza Jamil</a> — Web Developer &amp; AI Agent Specialist</div>
+      </div>
+    </div>
+
+    <!-- CHAT SCREEN -->
+    <div id="chat-screen">
+      <div id="messages">
+        <!-- Welcome state -->
+        <div class="welcome-state" id="welcome-state">
+          <div class="welcome-orb">✦</div>
+          <h2>Welcome!</h2>
+          <p>I'm <strong>NexusAI</strong> — your personal AI assistant.<br>Ask me anything, I'm here to help.</p>
+          <div class="suggestion-grid">
+            <button class="suggestion-card" onclick="suggest('Write a professional email for me')">
+              <div class="s-icon">✉️</div>
+              <div class="s-title">Draft an Email</div>
+              <div class="s-sub">Professional or personal</div>
+            </button>
+            <button class="suggestion-card" onclick="suggest('Explain and fix this code for me')">
+              <div class="s-icon">💻</div>
+              <div class="s-title">Code Help</div>
+              <div class="s-sub">Debug or explain</div>
+            </button>
+            <button class="suggestion-card" onclick="suggest('Tell me something interesting about technology')">
+              <div class="s-icon">🌍</div>
+              <div class="s-title">Learn Something</div>
+              <div class="s-sub">On any topic</div>
+            </button>
+            <button class="suggestion-card" onclick="suggest('Write a short creative story in 5 lines')">
+              <div class="s-icon">📝</div>
+              <div class="s-title">Creative Writing</div>
+              <div class="s-sub">Story, poem, content</div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUICK CHIPS + INPUT -->
+      <div id="input-area">
+        <div class="quick-chips" id="quick-chips">
+          <button class="chip" onclick="quickMsg('Summarize that for me')">📋 Summary</button>
+          <button class="chip" onclick="quickMsg('Explain that further')">🔍 Explain</button>
+          <button class="chip" onclick="quickMsg('Give me an example')">💡 Example</button>
+          <button class="chip" onclick="quickMsg('Reply in Roman Urdu')">🇵🇰 Urdu</button>
+          <button class="chip" onclick="quickMsg('Show it as code')">💻 Code</button>
+        </div>
+
+        <div class="input-row">
+          <textarea
+            id="user-input"
+            rows="1"
+            placeholder="Type a message... (Enter to send, Shift+Enter for new line)"
+            onkeydown="handleKey(event)"
+            oninput="autoResize(this)"
+          ></textarea>
+          <button id="send-btn" onclick="sendMessage()" title="Send (Enter)">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+        <div class="input-hint">Enter to send &nbsp;·&nbsp; Shift+Enter for new line</div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+
+<!-- ======================================================
+     JAVASCRIPT
+     ====================================================== -->
+<script>
+// ── STATE ──────────────────────────────────────────────
+let API_KEY = localStorage.getItem('nai_key') || '';
+let USER_NAME = localStorage.getItem('nai_name') || 'there';
+let conversationHistory = [];
+let chatSessions = JSON.parse(localStorage.getItem('nai_sessions') || '[]');
+let currentSessionId = null;
+let isBusy = false;
+
+// ── INIT ───────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  if (API_KEY) {
+    enterChat();
+    renderHistory();
+    setStatusConnected();
+  }
+});
+
+// ── SETUP ──────────────────────────────────────────────
+function startChat() {
+  const key  = document.getElementById('api-key-input').value.trim();
+  const name = document.getElementById('user-name-input').value.trim();
+  const err  = document.getElementById('error-box');
+
+  if (!key) {
+    showError('Please enter your API key first!');
+    return;
+  }
+  if (!key.startsWith('sk-ant')) {
+    showError('That key doesn\'t look right. It should start with "sk-ant-". Get one at console.anthropic.com.');
+    return;
+  }
+
+  API_KEY = key;
+  if (name) USER_NAME = name;
+  localStorage.setItem('nai_key', API_KEY);
+  localStorage.setItem('nai_name', USER_NAME);
+
+  err.style.display = 'none';
+  enterChat();
+  setStatusConnected();
+}
+
+function clearApiKey() {
+  if (!confirm('Remove the saved API key? You\'ll need to enter it again.')) return;
+  localStorage.removeItem('nai_key');
+  API_KEY = '';
+  conversationHistory = [];
+  document.getElementById('setup-screen').style.display = 'flex';
+  document.getElementById('chat-screen').style.display = 'none';
+  document.getElementById('status-dot').className = 'status-dot';
+  document.getElementById('status-text').textContent = 'No API key set';
+}
+
+function enterChat() {
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('chat-screen').style.display = 'flex';
+  document.getElementById('user-input').focus();
+}
+
+function setStatusConnected() {
+  document.getElementById('status-dot').className = 'status-dot green';
+  document.getElementById('status-text').textContent = 'Connected ✓';
+}
+
+function showError(msg) {
+  const el = document.getElementById('error-box');
+  el.textContent = '⚠️ ' + msg;
+  el.style.display = 'block';
+}
+
+// ── NEW CHAT ───────────────────────────────────────────
+function newChat() {
+  saveCurrentSession();
+  conversationHistory = [];
+  currentSessionId = null;
+
+  const msgs = document.getElementById('messages');
+  // Remove all bubbles but keep welcome state
+  msgs.innerHTML = `
+    <div class="welcome-state" id="welcome-state">
+      <div class="welcome-orb">✦</div>
+      <h2>Welcome!</h2>
+      <p>I'm <strong>NexusAI</strong> — your personal AI assistant.<br>Ask me anything, I'm here to help.</p>
+      <div class="suggestion-grid">
+        <button class="suggestion-card" onclick="suggest('Write a professional email for me')">
+          <div class="s-icon">✉️</div>
+          <div class="s-title">Draft an Email</div>
+          <div class="s-sub">Professional or personal</div>
+        </button>
+        <button class="suggestion-card" onclick="suggest('Explain and fix this code for me')">
+          <div class="s-icon">💻</div>
+          <div class="s-title">Code Help</div>
+          <div class="s-sub">Debug or explain</div>
+        </button>
+        <button class="suggestion-card" onclick="suggest('Tell me something interesting about technology')">
+          <div class="s-icon">🌍</div>
+          <div class="s-title">Learn Something</div>
+          <div class="s-sub">On any topic</div>
+        </button>
+        <button class="suggestion-card" onclick="suggest('Write a short creative story in 5 lines')">
+          <div class="s-icon">📝</div>
+          <div class="s-title">Creative Writing</div>
+          <div class="s-sub">Story, poem, content</div>
+        </button>
+      </div>
+    </div>`;
+
+  closeSidebar();
+}
+
+// ── SEND MESSAGE ───────────────────────────────────────
+async function sendMessage() {
+  if (isBusy) return;
+
+  const input = document.getElementById('user-input');
+  const text  = input.value.trim();
+  if (!text) return;
+
+  hideWelcome();
+  input.value = '';
+  input.style.height = 'auto';
+
+  // Add to history
+  conversationHistory.push({ role: 'user', content: text });
+
+  // Render user bubble
+  appendBubble('user', text, USER_NAME);
+
+  // Show typing
+  const typingRow = showTyping();
+  isBusy = true;
+  document.getElementById('send-btn').disabled = true;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-calls': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1500,
+        system: `You are NexusAI — a friendly, knowledgeable, and helpful AI assistant.
+The user's name is ${USER_NAME}.
+Always be clear, helpful, and friendly.
+Reply in the same language and style the user writes in — English, Roman Urdu, or otherwise.
+Use proper code blocks for code-related questions.`,
+        messages: conversationHistory
+      })
+    });
+
+    const data = await res.json();
+    typingRow.remove();
+
+    if (data.error) {
+      const errMsg = data.error.message || 'Something went wrong';
+      appendBubble('ai', `❌ Error: ${errMsg}`, 'NexusAI', true);
+    } else {
+      const reply = data.content
+        .filter(b => b.type === 'text')
+        .map(b => b.text)
+        .join('\n');
+
+      conversationHistory.push({ role: 'assistant', content: reply });
+      appendBubble('ai', reply, 'NexusAI');
+      saveCurrentSession();
+    }
+
+  } catch (e) {
+    typingRow.remove();
+    appendBubble('ai', `❌ Network error! Please check your internet connection or re-enter your API key.`, 'NexusAI', true);
+  }
+
+  isBusy = false;
+  document.getElementById('send-btn').disabled = false;
+  document.getElementById('user-input').focus();
+}
+
+// ── APPEND BUBBLE ──────────────────────────────────────
+function appendBubble(role, text, name, isError = false) {
+  const msgs = document.getElementById('messages');
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'msg-wrapper ' + role;
+
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar ' + role;
+  avatar.textContent = role === 'user' ? '👤' : '✦';
+
+  const body = document.createElement('div');
+  body.className = 'msg-body';
+
+  const nameRow = document.createElement('div');
+  nameRow.className = 'msg-name';
+  const now = new Date();
+  const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  nameRow.innerHTML = `<strong>${name}</strong> <span class="msg-time">${timeStr}</span>`;
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble ' + role;
+  if (isError) bubble.style.borderColor = 'rgba(248,113,113,0.4)';
+
+  bubble.innerHTML = formatMessage(text);
+
+  body.appendChild(nameRow);
+  body.appendChild(bubble);
+
+  wrapper.appendChild(avatar);
+  wrapper.appendChild(body);
+  msgs.appendChild(wrapper);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+// ── FORMAT MESSAGE (basic markdown) ───────────────────
+function formatMessage(text) {
+  // Escape HTML
+  let t = text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  // Code blocks
+  t = t.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) =>
+    `<pre><code>${code.trim()}</code></pre>`);
+
+  // Inline code
+  t = t.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+  // Bold
+  t = t.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+  // Line breaks
+  t = t.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
+
+  return '<p>' + t + '</p>';
+}
+
+// ── TYPING INDICATOR ──────────────────────────────────
+function showTyping() {
+  const msgs = document.getElementById('messages');
+  const wrapper = document.createElement('div');
+  wrapper.className = 'msg-wrapper ai';
+
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar ai';
+  avatar.textContent = '✦';
+
+  const body = document.createElement('div');
+  body.className = 'msg-body';
+
+  const nameRow = document.createElement('div');
+  nameRow.className = 'msg-name';
+  nameRow.innerHTML = '<strong>NexusAI</strong> <span class="msg-time">typing...</span>';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble ai';
+  bubble.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+
+  body.appendChild(nameRow);
+  body.appendChild(bubble);
+  wrapper.appendChild(avatar);
+  wrapper.appendChild(body);
+  msgs.appendChild(wrapper);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  return wrapper;
+}
+
+// ── HELPERS ────────────────────────────────────────────
+function hideWelcome() {
+  const w = document.getElementById('welcome-state');
+  if (w) w.remove();
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+}
+
+function suggest(text) {
+  document.getElementById('user-input').value = text;
+  sendMessage();
+}
+
+function quickMsg(text) {
+  const inp = document.getElementById('user-input');
+  inp.value = text + ' ';
+  inp.focus();
+}
+
+function copyChat() {
+  const text = conversationHistory
+    .map(m => (m.role === 'user' ? USER_NAME : 'NexusAI') + ': ' + m.content)
+    .join('\n\n');
+
+  if (!text) { showToast('Chat is empty!'); return; }
+  navigator.clipboard.writeText(text).then(() => showToast('✓ Chat copied!'));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── SIDEBAR ────────────────────────────────────────────
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ── SESSION HISTORY ───────────────────────────────────
+function saveCurrentSession() {
+  if (!conversationHistory.length) return;
+
+  const firstUser = conversationHistory.find(m => m.role === 'user');
+  const title = firstUser ? firstUser.content.slice(0, 40) + (firstUser.content.length > 40 ? '...' : '') : 'Chat';
+
+  if (!currentSessionId) {
+    currentSessionId = Date.now().toString();
+    chatSessions.unshift({ id: currentSessionId, title, messages: conversationHistory });
+    if (chatSessions.length > 20) chatSessions.pop();
+  } else {
+    const idx = chatSessions.findIndex(s => s.id === currentSessionId);
+    if (idx >= 0) chatSessions[idx].messages = [...conversationHistory];
+  }
+
+  localStorage.setItem('nai_sessions', JSON.stringify(chatSessions));
+  renderHistory();
+}
+
+function renderHistory() {
+  const list = document.getElementById('history-list');
+  if (!chatSessions.length) {
+    list.innerHTML = '<div style="padding:12px 18px;font-size:12px;color:var(--muted2)">No previous chats yet</div>';
+    return;
+  }
+
+  list.innerHTML = chatSessions.slice(0, 15).map(s => `
+    <div class="history-item ${s.id === currentSessionId ? 'active' : ''}" onclick="loadSession('${s.id}')">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      ${s.title}
+    </div>
+  `).join('');
+}
+
+function loadSession(id) {
+  const session = chatSessions.find(s => s.id === id);
+  if (!session) return;
+
+  currentSessionId = id;
+  conversationHistory = [...session.messages];
+
+  const msgs = document.getElementById('messages');
+  msgs.innerHTML = '';
+
+  conversationHistory.forEach(m => {
+    appendBubble(m.role, m.content, m.role === 'user' ? USER_NAME : 'NexusAI');
+  });
+
+  renderHistory();
+  closeSidebar();
+  msgs.scrollTop = msgs.scrollHeight;
+}
+</script>
+
+</body>
+</html>
